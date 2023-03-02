@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using Data;
@@ -16,11 +18,17 @@ namespace TestTask_A2_Parser
 
         public static void Main(string[] args)
         {
-            //var data = GetDataFromHttpRequest();
-            var count = GetRowsCount();
+            var pageCount = Math.Ceiling((double)GetRowsCount() / Size);
+
+            for (var i = 0; i < (int) pageCount; i++)
+            {
+                var data = GetDataFromHttpRequest(i);
+
+                WoodDealDataContext.InsertBatch(data);
+            }
         }
 
-        static List<WoodDeal> GetDataFromHttpRequest()
+        static List<WoodDeal> GetDataFromHttpRequest(int page)
         {
             using (var client = new HttpClient())
             {
@@ -31,7 +39,7 @@ namespace TestTask_A2_Parser
                         "query SearchReportWoodDeal($size: Int!, $number: Int!, $filter: Filter, $orders: [Order!]) {\n  searchReportWoodDeal(filter: $filter, pageable: {number: $number, size: $size}, orders: $orders) {\n    content {\n      sellerName\n      sellerInn\n      buyerName\n      buyerInn\n      woodVolumeBuyer\n      woodVolumeSeller\n      dealDate\n      dealNumber\n      __typename\n    }\n    __typename\n  }\n}\n",
                     Variables = new Variables
                     {
-                        Number = 0,
+                        Number = page,
                         Size = Size
                     }
                 };

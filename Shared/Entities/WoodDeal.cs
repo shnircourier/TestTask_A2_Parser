@@ -14,7 +14,7 @@ namespace Shared.Entities
 
         public string BuyerInn { get; set; }
 
-        public DateTime DealDate { get; set; }
+        public DateTime? DealDate { get; set; }
 
         public double WoodVolumeSeller { get; set; }
 

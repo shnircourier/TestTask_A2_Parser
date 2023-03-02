@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Globalization;
@@ -26,11 +27,11 @@ namespace Data
             woodDeals.ForEach(w =>
                 raw +=
                     $"(N'{w.DealNumber}'," +
-                    $" N'{w.SellerName}'," +
+                    $" N'{w.SellerName?.Replace('\'', '\"')}'," +
                     $" N'{w.SellerInn}'," +
-                    $" N'{w.BuyerName}'," +
+                    $" N'{w.BuyerName?.Replace('\'', '\"')}'," +
                     $" N'{w.BuyerInn}'," +
-                    $" '{w.DealDate}'," +
+                    $" '{w.DealDate ?? null}'," +
                     $" {w.WoodVolumeSeller.ToString(CultureInfo.InvariantCulture)}," +
                     $" {w.WoodVolumeBuyer.ToString(CultureInfo.InvariantCulture)}),");
 
