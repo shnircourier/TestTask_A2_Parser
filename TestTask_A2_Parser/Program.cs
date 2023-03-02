@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using Data;
 using Newtonsoft.Json;
 using Shared.Entities;
 using TestTask_A2_Parser.Requests;
 using TestTask_A2_Parser.Responses;
+using Timer = System.Timers.Timer;
 
 namespace TestTask_A2_Parser
 {
@@ -18,13 +19,43 @@ namespace TestTask_A2_Parser
 
         public static void Main(string[] args)
         {
-            var pageCount = Math.Ceiling((double)GetRowsCount() / Size);
-
-            for (var i = 0; i < (int) pageCount; i++)
+            while (true)
             {
-                var data = GetDataFromHttpRequest(i);
+                var dealNumbers = WoodDealDataContext.GetAllKeys();
 
-                WoodDealDataContext.InsertBatch(data);
+                var pageCount = Math.Ceiling((double)GetRowsCount() / Size);
+
+                for (var i = 0; i < (int) pageCount; i++)
+                {
+                    var dataFromHttp = GetDataFromHttpRequest(i);
+                    var dataToAdd = new List<WoodDeal>();
+                    var dataToUpdate = new List<WoodDeal>();
+                
+                    dataFromHttp.ForEach(d =>
+                    {
+                        if (!dealNumbers.Contains(d.DealNumber))
+                        {
+                            dealNumbers.Add(d.DealNumber);
+                            dataToAdd.Add(d);
+                        }
+                        else
+                        {
+                            dataToUpdate.Add(d);
+                        }
+                    });
+
+                    if (dataToAdd.Count != 0)
+                    {
+                        WoodDealDataContext.InsertBatch(dataToAdd);
+                    }
+
+                    if (dataToUpdate.Count != 0)
+                    {
+                        WoodDealDataContext.UpdateBatch(dataToUpdate);
+                    }
+                }
+                
+                Thread.Sleep(600_000);
             }
         }
 
